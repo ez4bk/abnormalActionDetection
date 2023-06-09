@@ -4,4 +4,5 @@ datasets
 runs
 src/view/*.ui
 .idea
-__MACOSX
+.DS_Store
+*/.DS_Store
