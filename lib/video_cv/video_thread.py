@@ -2,7 +2,6 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from numpy import ndarray
 
 from lib.video_cv.video_handle import VideoHandle
-from config import SETTINGS_DATA
 
 
 class VideoThread(QThread):

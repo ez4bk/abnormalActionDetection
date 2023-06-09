@@ -1,5 +1,5 @@
 from src.model.inference_res import InferenceRes
-from lib.yolo_detection.inference import Inference
+from lib.detection.yoloInference import Inference
 
 
 class ResWrapper(object):

@@ -3,3 +3,5 @@ Avenue Dataset
 datasets
 runs
 src/view/*.ui
+.idea
+__MACOSX
