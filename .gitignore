@@ -6,3 +6,4 @@ src/view/*.ui
 .idea
 .DS_Store
 */.DS_Store
+*/__pycache__
