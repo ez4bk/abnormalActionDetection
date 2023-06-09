@@ -1,0 +1,17 @@
+{
+    "confidence": 0.5,
+    "iou": 0.45,
+    "agnostic": false,
+    "multi_label": false,
+    "max_det": 1000,
+    "export_path": "/Users/ez4bk/",
+    "time_interval": 2,
+    "video_source": "url",
+    "video_path": "rtsp://admin:12345@192.168.14.2:554/ch1/main/av_stream",
+    "reset": false,
+    "stop_condition": "6mm",
+    "account": "admin",
+    "password": "12345",
+    "ip": "192.168.14.3",
+    "port": 554
+}
