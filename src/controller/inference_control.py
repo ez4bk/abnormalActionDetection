@@ -27,6 +27,7 @@ class InferenceWindow(QMainWindow, Ui_MainWindow):
 
     def import_video(self):
         path = self.open_file_selector()
+        self.pathLine.setText(path)
 
     # def init_video(self):
     #     self.videoView.setScaledContents(True)
