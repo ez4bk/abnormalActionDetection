@@ -2,7 +2,7 @@ import cv2
 from ultralytics import YOLO
 
 # Load the YOLOv8 model
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8n_sup.pt')
 
 # Open the video file
 video_path = "path/to/your/video/file.mp4"
@@ -15,14 +15,17 @@ while cap.isOpened():
 
     if success:
         # Run YOLOv8 inference on the frame
-        results = model(frame, conf=0.1)
+        results = model(frame, conf=0.1, device="mps")
 
         # Visualize the results on the frame
         annotated_frame = results[0].plot()
 
         # Display the annotated frame
         cv2.imshow("YOLOv8 Inference", annotated_frame)
-
+        names = model.names
+        for r in results:
+            for c in r.boxes.cls:
+                print(names[int(c)])
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break

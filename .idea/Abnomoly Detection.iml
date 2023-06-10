@@ -11,4 +11,15 @@
     <orderEntry type="jdk" jdkName="Python 3.9 (Abnomoly Detection)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PackageRequirementsSettings">
+    <option name="versionSpecifier" value="Greater or equal (&gt;=x.y.z)" />
+    <option name="modifyBaseFiles" value="true" />
+  </component>
+  <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/lib" />
+      </list>
+    </option>
+  </component>
 </module>

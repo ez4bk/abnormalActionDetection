@@ -11,89 +11,74 @@ from PyQt6.QtCore import pyqtSlot, QDir
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QMainWindow, QFileDialog, QTableWidgetItem
 from numpy import ndarray
+from ultralytics import YOLO
+import torch.cuda as cuda
 
 from src.view.abormalActionDetection import Ui_MainWindow
+from lib.yolo_sup_thread import YoloSupThread as YoloSup
 
 
 class InferenceWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(InferenceWindow, self).__init__(parent)
         self.setupUi(self)
-
         self.set_buttons()
+
+        self.thread = None
+        self.video_path = None
+        self.ml_type = self.comboBox.currentIndex()
 
     def set_buttons(self):
         self.importButtonn.clicked.connect(self.import_video)
+        self.startButton.clicked.connect(self.start_inference)
+        self.comboBox.currentIndexChanged.connect(self.change_ml_type)
 
     def import_video(self):
-        path = self.open_file_selector()
-        self.pathLine.setText(path)
+        self.video_path = self.open_file_selector()
+        self.pathLine.setText(self.video_path)
 
-    # def init_video(self):
-    #     self.videoView.setScaledContents(True)
-    #     self.videoSettingLabel.setScaledContents(True)
-    #     self.v_thread = VideoThread()
-    #     self.menuList.setEnabled(True)
-    #     self.v_thread.change_pixmap_signal.connect(self.update_image)
-    #     self.v_thread.image_to_infer.connect(self.showImage)
-    #     self.v_thread.finished.connect(self.v_thread_finished)
-    #     self.v_thread.start()
-    #
-    # def v_thread_finished(self):
-    #     self.v_thread = None
-    #
-    # @pyqtSlot(ndarray)
-    # def showImage(self, img_arr):
-    #     if self.startButton.isEnabled():
-    #         return
-    #     img = cv2.cvtColor(img_arr, cv2.COLOR_BGR2RGB)
-    #     self.current_img = Image.fromarray(img)
-    #     h, w, ch = img.shape
-    #     bytes_per_line = ch * w
-    #     convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
-    #     self.inputImg.setPixmap(QPixmap.fromImage(convert_to_Qt_format))
-    #     if not self.startButton.isEnabled():
-    #         while not self.start_inference():
-    #             pass
-    #
-    # @pyqtSlot(ndarray)
-    # def update_image(self, cv_img):
-    #     """Updates the image_label with a new opencv image"""
-    #     qt_img = self.convert_cv_qt(cv_img)
-    #     self.videoView.setPixmap(qt_img)
-    #     self.videoSettingLabel.setPixmap(qt_img)
-    #
-    # @staticmethod
-    # def convert_cv_qt(cv_img):
-    #     """Convert from an opencv image to QPixmap"""
-    #     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-    #     h, w, ch = rgb_image.shape
-    #     bytes_per_line = ch * w
-    #     convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
-    #     # p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
-    #     return QPixmap.fromImage(convert_to_Qt_format)
-    #
-    # def start_inference(self):
-    #     if not self.current_img:
-    #         return False
-    #     if not self.inferences.start_inference(self.current_img, self.stop_condition):
-    #         self.set_stop_button()
-    #     res_img = self.inferences.get_res_img_arr()
-    #     h, w, ch = res_img.shape
-    #     bytes_per_line = ch * w
-    #     convert_to_Qt_format = QtGui.QImage(res_img.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
-    #     self.resultImg.setPixmap(QPixmap.fromImage(convert_to_Qt_format))
-    #     self.update_table()
-    #     return True
-    #
-    # def update_table(self):
-    #     self.tableWidget.setRowCount(0)
-    #     for _ in self.inferences.results_to_list():
-    #         rowPos = self.tableWidget.rowCount()
-    #         self.tableWidget.insertRow(rowPos)
-    #         self.tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(_[0])))
-    #         self.tableWidget.setItem(rowPos, 1, QTableWidgetItem(str(_[1])))
-    #         self.tableWidget.setItem(rowPos, 2, QTableWidgetItem(str(_[2])))
+    def start_inference(self):
+        if not self.video_path:
+            return
+        if self.ml_type == 1:
+            pass
+        else:
+            self.yolo_inference()
+
+    def change_ml_type(self):
+        self.ml_type = self.comboBox.currentIndex()
+
+    def yolo_inference(self):
+        self.thread = YoloSup(self)
+        self.startButton.setEnabled(False)
+        self.thread.change_pixmap_signal.connect(self.update_image)
+        self.thread.output_img.connect(self.showOutput)
+        self.thread.finished.connect(self.thread_finished)
+        self.thread.start()
+
+    @pyqtSlot(ndarray)
+    def update_image(self, img_arr):
+        self.video.setPixmap(self.convert_cv_qt(img_arr).scaled(self.video.width(), self.video.height()))
+
+    @pyqtSlot(ndarray)
+    def showOutput(self, img_arr):
+        self.thread = None
+        self.startButton.setEnabled(True)
+        self.video.setPixmap(self.convert_cv_qt(img_arr).scaled(self.video.width(), self.video.height()))
+
+    def thread_finished(self):
+        self.thread = None
+        self.startButton.setEnabled(True)
+
+    @staticmethod
+    def convert_cv_qt(cv_img):
+        """Convert from an opencv image to QPixmap"""
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format.Format_RGB888)
+        # p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
+        return QPixmap.fromImage(convert_to_Qt_format)
 
     def open_file_selector(self):
         from pathlib import Path
