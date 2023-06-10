@@ -19,6 +19,7 @@
     <option name="namespacePackageFolders">
       <list>
         <option value="$MODULE_DIR$/lib" />
+        <option value="$MODULE_DIR$/wetectron/configs" />
       </list>
     </option>
   </component>
