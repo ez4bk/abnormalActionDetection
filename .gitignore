@@ -9,3 +9,4 @@ src/view/*.ui
 */__pycache__
 */*/__pycache__
 Stanford40
+*.zip

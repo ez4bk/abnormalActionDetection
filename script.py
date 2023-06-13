@@ -2,10 +2,10 @@ import cv2
 from ultralytics import YOLO
 
 # Load the YOLOv8 model
-model = YOLO('yolov8n_sup.pt')
+model = YOLO('best.pt')
 
 # Open the video file
-video_path = "path/to/your/video/file.mp4"
+video_path = "Avenue Dataset/testing_videos/01.avi"
 cap = cv2.VideoCapture(0)
 
 # Loop through the video frames
@@ -15,7 +15,7 @@ while cap.isOpened():
 
     if success:
         # Run YOLOv8 inference on the frame
-        results = model(frame, conf=0.1, device="mps")
+        results = model(frame, conf=0.5, device="mps")
 
         # Visualize the results on the frame
         annotated_frame = results[0].plot()
